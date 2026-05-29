@@ -65,6 +65,7 @@ export default function RootLayout({
     <html lang="id" className={fontVariables} suppressHydrationWarning>
       <head>
         <link rel="preload" as="image" href="/logo_hmti.png" />
+        <link rel="preload" as="image" href="/thankyou.png" />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('undangan-theme');if(!t){t='dark';}document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='dark';}})();`,
