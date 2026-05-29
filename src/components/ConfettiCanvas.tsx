@@ -15,14 +15,15 @@ export default function ConfettiCanvas({ active }: { active: boolean }) {
 
   const colors = ["#c9b59c", "#a89072", "#d9cfc7", "#efe9e3", "#e8d8c0", "#b8a082", "#d4af37", "#f0e0c8"];
 
-  const launch = useCallback(() => {
+  const launch = useCallback((isSecondLoop = false) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
     const pieces: ConfettiPiece[] = [];
-    for (let i = 0; i < 200; i++) {
+    const count = isSecondLoop ? 150 : 200;
+    for (let i = 0; i < count; i++) {
       const shapes: ("rect" | "circle" | "star")[] = ["rect", "circle", "star"];
       pieces.push({
         x: canvas.width / 2 + (Math.random() - 0.5) * 400,
@@ -38,12 +39,16 @@ export default function ConfettiCanvas({ active }: { active: boolean }) {
         opacity: 1,
       });
     }
-    piecesRef.current = pieces;
+    piecesRef.current = [...piecesRef.current, ...pieces];
   }, []);
 
   useEffect(() => {
     if (!active) return;
-    launch();
+    piecesRef.current = [];
+    launch(false);
+
+    const timer1 = setTimeout(() => launch(true), 1200);
+    const startTime = Date.now();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -55,13 +60,21 @@ export default function ConfettiCanvas({ active }: { active: boolean }) {
       const pieces = piecesRef.current;
       let alive = false;
 
+      const elapsed = Date.now() - startTime;
+
       pieces.forEach((p) => {
         p.x += p.vx;
         p.vy += p.gravity;
         p.y += p.vy;
         p.rotation += p.rotationSpeed;
         p.vx *= 0.99;
-        if (p.y > canvas.height + 50) { p.opacity -= 0.02; }
+        
+        // Force fade out all pieces after 4 seconds to not disturb UI
+        if (elapsed > 4000) {
+          p.opacity -= 0.015;
+        } else if (p.y > canvas.height + 50) { 
+          p.opacity -= 0.02; 
+        }
         if (p.opacity <= 0) return;
         alive = true;
 
@@ -99,7 +112,10 @@ export default function ConfettiCanvas({ active }: { active: boolean }) {
     };
     animate();
 
-    return () => cancelAnimationFrame(animRef.current);
+    return () => {
+      clearTimeout(timer1);
+      cancelAnimationFrame(animRef.current);
+    };
   }, [active, launch]);
 
   return <canvas ref={canvasRef} className="confetti-canvas" />;
