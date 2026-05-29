@@ -114,13 +114,22 @@ export async function deleteEvent(id: string): Promise<void> {
 
 export async function toggleEventActive(id: string): Promise<void> {
   if (!isSupabaseConfigured()) { toggleActiveLocal(id); return; }
-  // Deactivate all first
-  await supabase.from("events").update({ is_active: false }).neq("id", "");
-  // Then activate the selected one
+  
+  // Get current state before changing anything
   const events = await fetchEvents();
   const target = events.find((e) => e.id === id);
-  if (target && !target.isActive) {
-    await supabase.from("events").update({ is_active: true }).eq("id", id);
+  if (!target) return;
+  
+  const currentlyActive = target.isActive;
+  
+  // Deactivate all first (using valid UUID or boolean check)
+  const { error: err1 } = await supabase.from("events").update({ is_active: false }).eq("is_active", true);
+  if (err1) console.error("Error deactivating events:", err1.message);
+  
+  // If it was not active before, activate it
+  if (!currentlyActive) {
+    const { error: err2 } = await supabase.from("events").update({ is_active: true }).eq("id", id);
+    if (err2) console.error("Error activating event:", err2.message);
   }
 }
 

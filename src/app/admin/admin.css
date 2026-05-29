@@ -87,7 +87,7 @@
   -webkit-backdrop-filter: blur(12px);
 }
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-2);
   border-color: var(--mocha);
   color: var(--ink);
   transform: translateY(-2px);
