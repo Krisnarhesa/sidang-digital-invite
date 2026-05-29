@@ -432,11 +432,21 @@ body::before {
 
 .loading-text {
   font-family: var(--font-cormorant), serif;
-  font-size: 1.3rem; color: var(--ink-soft);
-  margin-bottom: 2rem; letter-spacing: 4px;
+  font-size: 1.1rem; color: var(--ink-soft);
+  margin-bottom: 2rem; letter-spacing: 3px;
   font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
-.loading-text .bracket { color: var(--mocha-deep); margin: 0 4px; }
+@media (max-width: 400px) {
+  .loading-text {
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+  }
+}
+.loading-text .bracket { color: var(--mocha-deep); margin: 0 6px; }
 .loading-dots span {
   animation: loadDot 1.4s infinite;
   display: inline-block; color: var(--mocha-deep);

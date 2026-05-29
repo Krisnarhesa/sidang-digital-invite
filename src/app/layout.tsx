@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata } from "next";
 import {
-  Inter,
   Cinzel,
-  Playfair_Display,
   Cormorant_Garamond,
+  Inter,
   Italianno,
+  Playfair_Display,
 } from "next/font/google";
 import "./globals.css";
 
@@ -42,9 +42,9 @@ const fontVariables = `${inter.variable} ${cinzel.variable} ${playfair.variable}
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  title: "Undangan Sidang Skripsi - HMTI Udayana",
+  title: "Undangan Sidang Skripsi TI Udayana",
   description:
-    "Undangan Sidang Skripsi - HMTI Udayana, Program Studi Teknologi Informasi",
+    "Undangan Sidang Skripsi Program Studi Teknologi Informasi Universitas Udayana",
   icons: {
     icon: "/logo_hmti.png",
     apple: "/logo_hmti.png",
