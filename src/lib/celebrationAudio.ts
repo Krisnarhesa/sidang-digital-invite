@@ -77,6 +77,13 @@ export function playCelebrationFor(memberId: string, customAudioUrl?: string) {
   const ctx = getCtx();
   if (!ctx) return;
 
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent('duck-bg-audio', { detail: { duck: true } }));
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('duck-bg-audio', { detail: { duck: false } }));
+    }, 2500); // web audio chimes run for ~2 seconds
+  }
+
   const idx = hashStringToInt(memberId) % CHORDS.length;
   const chord = CHORDS[idx];
   const now = ctx.currentTime + 0.02;
@@ -101,6 +108,14 @@ function playCustomAudio(url: string) {
   }
   const audio = new Audio(url);
   audio.volume = 0.7;
+  
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent('duck-bg-audio', { detail: { duck: true } }));
+    audio.onended = () => {
+      window.dispatchEvent(new CustomEvent('duck-bg-audio', { detail: { duck: false } }));
+    };
+  }
+
   audio.play().catch((e) => console.warn("[celebrationAudio] custom audio play failed:", e));
   activeCustomAudio = audio;
 }

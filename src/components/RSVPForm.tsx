@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { submitRSVP } from "@/lib/storage";
 import confetti from "canvas-confetti";
 
@@ -12,6 +12,22 @@ export function RSVPForm({ eventId, defaultName = "" }: { eventId: string; defau
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const audioRefs = useRef<{ [key: string]: HTMLAudioElement }>({});
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      audioRefs.current = {
+        hadir: new Audio("/audio/thankyou.mp3"),
+        tidak_hadir: new Audio("/audio/no.mp3"),
+        mungkin: new Audio("/audio/akh.mp3"),
+      };
+      // Preload audio files
+      Object.values(audioRefs.current).forEach(a => {
+        a.load();
+      });
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -20,6 +36,23 @@ export function RSVPForm({ eventId, defaultName = "" }: { eventId: string; defau
     setError(null);
     try {
       const code = await submitRSVP(eventId, name, status, message);
+      
+      // Play sound immediately based on status
+      const audio = audioRefs.current[status];
+      if (audio) {
+        audio.currentTime = 0;
+        
+        // Mengecilkan suara background
+        window.dispatchEvent(new CustomEvent('duck-bg-audio', { detail: { duck: true } }));
+        
+        audio.play().catch(e => console.log("Audio play failed:", e));
+        
+        // Mengembalikan suara background ketika audio selesai
+        audio.onended = () => {
+          window.dispatchEvent(new CustomEvent('duck-bg-audio', { detail: { duck: false } }));
+        };
+      }
+
       if (status === "hadir") {
         setQrCode(code);
         // Trigger a nice confetti burst for attendees
@@ -58,8 +91,20 @@ export function RSVPForm({ eventId, defaultName = "" }: { eventId: string; defau
                 <img src="/thankyou.png" alt="Thank You" className="thankyou-img-animate" style={{ maxWidth: '100%', height: 'auto', borderRadius: '12px', boxShadow: '0 8px 25px rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)' }} />
               </div>
             </>
-          ) : (
+          ) : status === "tidak_hadir" ? (
+            <>
               <p style={{ marginTop: '1rem', fontStyle: 'italic', opacity: 0.8 }}>Terima kasih atas konfirmasinya. Kami menghargai doa dan dukungan Anda!</p>
+              <div style={{ marginTop: '2rem', marginBottom: '1rem', transform: 'scale(1)', transition: 'transform 0.3s ease' }}>
+                <img src="/no.png" alt="Tidak Hadir" className="thankyou-img-animate" style={{ maxWidth: '100%', height: 'auto', borderRadius: '12px', boxShadow: '0 8px 25px rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)' }} />
+              </div>
+            </>
+          ) : (
+            <>
+              <p style={{ marginTop: '1rem', fontStyle: 'italic', opacity: 0.8 }}>Terima kasih atas konfirmasinya. Kami menunggu kabar pasti dari Anda!</p>
+              <div style={{ marginTop: '2rem', marginBottom: '1rem', transform: 'scale(1)', transition: 'transform 0.3s ease' }}>
+                <img src="/mungkin.jpg" alt="Mungkin" className="thankyou-img-animate" style={{ maxWidth: '100%', height: 'auto', borderRadius: '12px', boxShadow: '0 8px 25px rgba(0,0,0,0.3)', border: '1px solid var(--glass-border)' }} />
+              </div>
+            </>
           )}
         </div>
       </div>

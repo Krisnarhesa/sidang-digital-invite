@@ -22,6 +22,19 @@ export default function AudioPlayer({ autoPlay }: { autoPlay: boolean }) {
     }
   }, [autoPlay]);
 
+  useEffect(() => {
+    const handleDuck = (e: Event) => {
+      const customEvent = e as CustomEvent<{ duck: boolean }>;
+      if (audioRef.current) {
+        // Jika duck = true, kecilkan volume menjadi 0.05, jika false kembalikan ke 0.25
+        audioRef.current.volume = customEvent.detail.duck ? 0.05 : 0.25;
+      }
+    };
+    
+    window.addEventListener('duck-bg-audio', handleDuck);
+    return () => window.removeEventListener('duck-bg-audio', handleDuck);
+  }, []);
+
   const toggle = () => {
     const a = audioRef.current;
     if (!a) return;
